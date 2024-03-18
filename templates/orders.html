@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="orders_wrapper">
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>DETAILS</th>
+            <th>DATE</th>
+            <th>PREPARATION TIME</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{order.id}}</td>
+            <td>{{order.details}}</td>
+            <td>{{order.date}}</td>
+            <td>{{order.preparation_time}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

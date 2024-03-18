@@ -1,0 +1,17 @@
+.all_orders_wrapper {
+    display: flex;
+    padding-left: 100px;
+}
+
+.all_orders_wrapper > div {
+    margin-left: 50px;
+}
+
+table, th, td {
+    border: blueviolet 2px solid;
+}
+
+table {
+    width: 1000px;
+    text-align: center;
+}
