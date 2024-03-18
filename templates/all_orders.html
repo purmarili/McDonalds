@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="all_orders_wrapper">
+    <div>
+        <h2>Preparing</h2>
+        <ul>
+            {% for order in preparing %}
+            <li>{{order.id}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h2>Ready</h2>
+        <ul>
+            {% for order in ready %}
+            <li>{{order.id}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
