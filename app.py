@@ -84,6 +84,7 @@ def create_app():
                 return redirect(url_for('home'))
             return render_template('register.html', session=session)
 
+        # for the sake of new branch
         username = request.form.get('username', None)
         email = request.form.get('email', None)
         password = request.form.get('password', None)
@@ -121,7 +122,7 @@ def create_app():
 
     def clear_session_keys():
         session.pop(SessionKeyEnum.ID.value, None)
-        session.pop(SessionKeyEnum.USERNAME.value, None)
+        session.pop(SessionKeyEnum.GAMARJOBA.name, None)
         session.pop(SessionKeyEnum.AUTHORIZED.value, None)
 
     return app
