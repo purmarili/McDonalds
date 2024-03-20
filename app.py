@@ -12,7 +12,7 @@ from utils import check_password, get_hashed_password
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mcdonalds.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/mcdonalds.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'password'
     app.permanent_session_lifetime = timedelta(hours=2)
@@ -96,6 +96,17 @@ def create_app():
             )
 
         return redirect(url_for('login'))
+
+    @app.route('/delete/<int:order_id>', methods=['POST'])
+    def delete(order_id: int):
+        if SessionKeyEnum.AUTHORIZED.value not in session:
+            return redirect(url_for('home'))
+
+        user_order = user_order_repository.get_by_id(id_=order_id, db=db)
+        if user_order and user_order.user_id == session[SessionKeyEnum.ID.value]:
+            user_order_repository.delete(order_id, db=db)
+
+        return redirect(url_for('orders'))
 
     @app.route('/logout')
     def logout():
