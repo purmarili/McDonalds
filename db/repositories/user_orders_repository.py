@@ -43,3 +43,22 @@ class UserOrderRepository(BaseRepository):
             )
         )
         db.session.commit()
+
+    def delete(self, order_id: int, db):
+        order = db.session.query(UserOrder).filter(
+            UserOrder.id == order_id
+        ).one_or_none()
+        db.session.delete(order)
+        db.session.commit()
+
+    def get_by_id(self, id_: int, db):
+        order = db.session.query(UserOrder).filter(
+            UserOrder.id == id_
+        ).one_or_none()
+        return UserOrderDto(
+            id=order.id,
+            user_id=order.user_id,
+            details=order.details,
+            date=order.date,
+            preparation_time=order.preparation_time
+        ) if order else None
