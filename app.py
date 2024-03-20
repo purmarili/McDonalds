@@ -103,6 +103,7 @@ def create_app():
             return redirect(url_for('home'))
 
         user_order = user_order_repository.get_by_id(id_=order_id, db=db)
+        # If order exists and it belongs to the current user, delete
         if user_order and user_order.user_id == session[SessionKeyEnum.ID.value]:
             user_order_repository.delete(order_id, db=db)
 
