@@ -84,6 +84,7 @@ def create_app():
                 return redirect(url_for('home'))
             return render_template('register.html', session=session)
 
+        # for the sake of new branch
         username = request.form.get('username', None)
         email = request.form.get('email', None)
         password = request.form.get('password', None)
