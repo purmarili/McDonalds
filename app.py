@@ -122,7 +122,7 @@ def create_app():
 
     def clear_session_keys():
         session.pop(SessionKeyEnum.ID.value, None)
-        session.pop(SessionKeyEnum.GAMARJOBA.name, None)
+        session.pop(SessionKeyEnum.USERNAME.value, None)
         session.pop(SessionKeyEnum.AUTHORIZED.value, None)
 
     return app
