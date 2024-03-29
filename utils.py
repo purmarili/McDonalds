@@ -44,7 +44,7 @@ def get_movie_info(li):
     return image_url, top_250_rating, title, year, time, rating, rating_count
 
 
-def get_cast_info(li):
+async def get_cast_info(li):
     result = {
         'image_url': [],
         'full_name': [],
