@@ -1,18 +1,24 @@
 from datetime import timedelta, datetime
 
+import requests
+from bs4 import BeautifulSoup
 from flask import Flask, session, redirect, url_for, render_template, request
+import asyncio
 
-from db.dto.user_dto import UserDto
 from db.models import *
+from db.repositories.cast_repository import CastRepository
+from db.repositories.movie_cast_repository import MovieCastRepository
+from db.repositories.movie_repository import MovieRepository
 from db.repositories.user_orders_repository import UserOrderRepository
 from db.repositories.user_repository import UserRepository
 from models.enums import SessionKeyEnum
-from utils import check_password, get_hashed_password
+from utils import check_password, get_hashed_password, clear_session_keys, assign_session_keys, get_movie_info, \
+    get_cast_info, REQUEST_HEADERS
 
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/mcdonalds.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mcdonalds.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'password'
     app.permanent_session_lifetime = timedelta(hours=2)
@@ -24,6 +30,9 @@ def create_app():
 
     user_repository = UserRepository()
     user_order_repository = UserOrderRepository()
+    movie_repository = MovieRepository()
+    cast_repository = CastRepository()
+    movie_cast_repository = MovieCastRepository()
 
     @app.route('/')
     def home():
@@ -72,7 +81,7 @@ def create_app():
         user = user_repository.get(username=username, db=db)
         if user:
             if check_password(password=password, hashed_password=user.hashed_password):
-                assign_session_keys(user=user)
+                assign_session_keys(user=user, session_=session)
                 return redirect(url_for('home'))
 
         return redirect(url_for('login'))
@@ -112,22 +121,41 @@ def create_app():
 
     @app.route('/logout')
     def logout():
-        clear_session_keys()
+        clear_session_keys(session_=session)
         return redirect(url_for('home'))
 
-    def assign_session_keys(user: UserDto):
-        session[SessionKeyEnum.ID.value] = user.id
-        session[SessionKeyEnum.USERNAME.value] = user.username
-        session[SessionKeyEnum.AUTHORIZED.value] = True
+    @app.route('/additional/imdb_250')
+    async def additional_imdb_250():
+        response = requests.get('https://www.imdb.com/chart/top/?ref_=nv_mv_250', headers=REQUEST_HEADERS)
+        bs = BeautifulSoup(response.text, 'html.parser')
+        div = bs.find('div', class_='sc-7a1e0ab6-3')
+        ul = div.find('ul')
+        all_li = ul.find_all('li')
 
-    def clear_session_keys():
-        session.pop(SessionKeyEnum.ID.value, None)
-        session.pop(SessionKeyEnum.USERNAME.value, None)
-        session.pop(SessionKeyEnum.AUTHORIZED.value, None)
+        start_time = datetime.datetime.now()
+
+        async def process_single_movie(li_):
+            image_url, top_250_rating, title, year, time_, rating, rating_count = get_movie_info(li=li_)
+            cast_info = await get_cast_info(li=li_)
+            movie_id = movie_repository.add(title=title, year=year, time=time_, rating=float(rating),
+                                            rating_count=rating_count,
+                                            top_250_rating=int(top_250_rating), image_url=image_url, db=db)
+            for name, movie_name, image_url in zip(cast_info['full_name'], cast_info['movie_name'],
+                                                   cast_info['image_url']):
+                cast_id = cast_repository.add_update(name=name, movie_name=movie_name, image_url=image_url, db=db)
+                movie_cast_repository.add(movie_id=movie_id, cast_id=cast_id, db=db)
+
+        tasks = [process_single_movie(li_=li) for li in all_li[:50]]
+        await asyncio.gather(*tasks)
+
+        end_time = datetime.datetime.now()
+        print(f'TIME: {end_time - start_time} SECONDS!')
+
+        return render_template('index.html')
 
     return app
 
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(port=8001)
