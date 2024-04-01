@@ -18,15 +18,7 @@ class MovieRepository(BaseRepository):
 
         results = db.session.query(Movie).filter(*conditions).all()
         return [
-            MovieDto(
-                title=title,
-                year=r.year,
-                time=r.time,
-                rating=r.rating,
-                rating_count=r.rating_count,
-                top_250_rating=r.top_250_rating,
-                image_url=r.image_url
-            )
+            MovieDto.model_validate(r)
             for r in results
         ]
 

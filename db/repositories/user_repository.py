@@ -24,25 +24,13 @@ class UserRepository(BaseRepository):
 
         result = db.session.query(User).filter(or_(*conditions)).first()
         if result:
-            return UserDto(
-                id=result.id,
-                username=result.username,
-                email=result.email,
-                hashed_password=result.hashed_password,
-                create_date=result.create_date
-            )
+            return UserDto.model_validate(result)
         return None
 
     def get_all(self, db) -> List[UserDto]:
         results = db.session.query(User).all()
         return [
-            UserDto(
-                id=r.id,
-                username=r.username,
-                email=r.email,
-                hashed_password=r.hashed_password,
-                create_date=r.create_date
-            )
+            UserDto.model_validate(r)
             for r in results
         ]
 

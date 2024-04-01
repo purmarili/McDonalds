@@ -1,4 +1,5 @@
 import hashlib
+import pickle
 
 from db.dto.user_dto import UserDto
 from models.enums import SessionKeyEnum
@@ -17,6 +18,10 @@ def check_password(password: str, hashed_password: str) -> bool:
 
 
 def get_hashed_password(password: str) -> str:
+    if password == '' or password is None:
+        raise ValueError('Password is empty!')
+    if len(password) < 5 or len(password) > 20:
+        raise ValueError('Password length error!')
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 
