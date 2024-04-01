@@ -24,13 +24,7 @@ class UserOrderRepository(BaseRepository):
     def get_all(self, db) -> List[UserOrderDto]:
         results = db.session.query(UserOrder).all()
         return [
-            UserOrderDto(
-                id=r.id,
-                user_id=r.user_id,
-                details=r.details,
-                date=r.date,
-                preparation_time=r.preparation_time
-            )
+            UserOrderDto.model_validate(r)
             for r in results
         ]
 
@@ -55,10 +49,4 @@ class UserOrderRepository(BaseRepository):
         order = db.session.query(UserOrder).filter(
             UserOrder.id == id_
         ).one_or_none()
-        return UserOrderDto(
-            id=order.id,
-            user_id=order.user_id,
-            details=order.details,
-            date=order.date,
-            preparation_time=order.preparation_time
-        ) if order else None
+        return UserOrderDto.model_validate(order) if order else None
