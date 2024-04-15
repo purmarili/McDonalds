@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculate</title>
+    <style>
+        .calculator-wrapper {
+            text-align: center;
+        }
+        .calculater-form div {
+            {#border: 1px black solid;#}
+            {#border-radius: 10px;#}
+            {#width: 300px;#}
+            padding: 5px;
+        }
+
+        input, select {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-wrapper">
+        <form action="#" method="get" class="calculater-form">
+            <div>
+                <input type="text" name="number_1">
+            </div>
+            <div>
+                <input type="text" name="number_2">
+            </div>
+            <div>
+                <select name="operator">
+                    <option value="sum" selected>Sum</option>
+                    <option value="sub">Subtract</option>
+                    <option value="div">Divide</option>
+                    <option value="mul">Multiply</option>
+                </select>
+            </div>
+            <div>
+                <input type="submit" value="Calculate">
+            </div>
+            {% if result %}
+            <div>
+                <p>{{ result }}</p>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>
