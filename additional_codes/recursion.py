@@ -224,4 +224,192 @@ def subset_sum(numbers: list, target: int, result: list, l_idx: int):
     subset_sum(numbers, target, result, l_idx + 1)
 
 
-subset_sum([3, 34, 4, 12, 5, 2], 9, [], 0)
+# subset_sum([3, 34, 4, 12, 5, 2], 9, [], 0)
+
+"""
+5. Rat in a Maze
+Consider a rat placed at the entrance of a maze. The maze is represented as a 2D array, 
+where 0s are blocked paths and 1s are open paths. The rat can move in four directions: up, down, left, and right. 
+The goal is for the rat to find a path from the entrance to the exit.
+: Write a recursive solution to find a path for the rat from the entrance to the exit of the maze.
+"""
+
+
+def rat_in_a_maze(maze: list[list[int]], curr_row: int, curr_col: int, target_row: int, target_col: int):
+    if curr_row > len(maze) - 1 or curr_row < 0 or curr_col > len(maze) - 1 or curr_col < 0:
+        return
+
+    if maze[curr_row][curr_col] in [0, -1]:
+        return
+
+    if curr_row == target_row and curr_col == target_col:
+        maze[curr_row][curr_col] = -1
+        for row in maze:
+            print(row)
+        print()
+
+    maze[curr_row][curr_col] = -1
+    rat_in_a_maze(maze, curr_row - 1, curr_col, target_row, target_col)
+    rat_in_a_maze(maze, curr_row, curr_col - 1, target_row, target_col)
+    rat_in_a_maze(maze, curr_row + 1, curr_col, target_row, target_col)
+    rat_in_a_maze(maze, curr_row, curr_col + 1, target_row, target_col)
+    maze[curr_row][curr_col] = 1
+
+
+maze_ = [
+    [1, 1, 1, 1],
+    [0, 1, 1, 1],
+    [1, 1, 1, 1],
+    [1, 0, 0, 0],
+]
+
+# rat_in_a_maze(maze_, 3, 0, 0, 2)
+
+
+"""
+6. Generate Parentheses
+Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+: For given n, generate all combinations of well-formed parentheses.
+"""
+
+
+def generate_parentheses(n_left: int, n_right: int, curr: str):
+    if n_left < 0 or n_right < 0:
+        return
+
+    if n_left == 0 and n_right == 0:
+        rights_needed = 0
+        for ch in curr:
+            if ch == '(':
+                rights_needed += 1
+            elif ch == ')':
+                rights_needed -= 1
+            if rights_needed < 0:
+                return
+        print(curr)
+
+    generate_parentheses(n_left - 1, n_right, curr + '(')
+    generate_parentheses(n_left, n_right - 1, curr + ')')
+
+
+N = 3
+# generate_parentheses(N, N, '')
+
+
+"""
+7. Sudoku Solver
+Write a program to solve a Sudoku puzzle by filling the empty cells. 
+A sudoku solution must satisfy all of the following rules:
+Each of the digits 1-9 must occur exactly once in each row.
+Each of the digits 1-9 must occur exactly once in each column.
+Each of the digits 1-9 must occur exactly once in each of the 9 3x3 sub-boxes of the grid.
+: Fill the empty cells to solve the Sudoku puzzle.
+"""
+
+
+def check_win(board: list[list[int]]):
+    n = 9
+
+    # Check rows and columns
+    for i in range(n):
+        row_nums = set()
+        col_nums = set()
+        for j in range(n):
+            # Check rows
+            if board[i][j] in row_nums or not 1 <= board[i][j] <= 9:
+                return False
+            row_nums.add(board[i][j])
+
+            # Check columns
+            if board[j][i] in col_nums or not 1 <= board[j][i] <= 9:
+                return False
+            col_nums.add(board[j][i])
+
+    # Check 3x3 sub-boxes
+    for start_row in range(0, n, 3):
+        for start_col in range(0, n, 3):
+            box_nums = set()
+            for i in range(3):
+                for j in range(3):
+                    val = board[start_row + i][start_col + j]
+                    if val in box_nums or not 1 <= val <= 9:
+                        return False
+                    box_nums.add(val)
+
+    return True
+
+
+def print_sudoku_board(board: list[list[int]]):
+    for row in board:
+        print(row)
+    print()
+
+
+def get_sudoku_empty_board() -> list[list[int]]:
+    lst = []
+    for _ in range(9):
+        lst.append([0 for _ in range(9)])
+    return lst
+
+
+def is_valid_move(board: list[list[int]], row: int, col: int, num) -> bool:
+    n = 9
+    # Check if the number is already in the row
+    if num in board[row]:
+        return False
+
+    # Check if the number is already in the column
+    for i in range(n):
+        if board[i][col] == num:
+            return False
+
+    # Check if the number is in the 3x3 sub-box
+    start_row = (row // 3) * 3
+    start_col = (col // 3) * 3
+    for i in range(3):
+        for j in range(3):
+            if board[start_row + i][start_col + j] == num:
+                return False
+    return True
+
+exec_finished = False
+
+def sudoku_solver(board: list[list[int]], row: int, col: int, num: int):
+    global exec_finished
+    if exec_finished:
+        return
+    
+    if row < 0 or col < 0 or row > 8 or col > 8:
+        return
+
+    if board[row][col] != 0:
+        return
+
+    if not (row == 0 and col == 0):
+        if not is_valid_move(board, row, col, num):
+            return
+
+    board[row][col] = num
+
+    finished = True
+    for row_ in board:
+        if 0 in row_:
+            finished = False
+
+    if finished:
+        if check_win(board):
+            exec_finished = True
+            print_sudoku_board(board)
+        return
+
+    for num_ in range(1, 10):
+        sudoku_solver(board, row - 1, col, num_)
+        sudoku_solver(board, row, col - 1, num_)
+        sudoku_solver(board, row + 1, col, num_)
+        sudoku_solver(board, row, col + 1, num_)
+
+    board[row][col] = 0
+
+
+board_ = get_sudoku_empty_board()
+sudoku_solver(board_, 0, 0, 1)
